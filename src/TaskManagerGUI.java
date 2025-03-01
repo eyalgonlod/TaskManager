@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.Comparator;
 import java.util.List;
 
 public class TaskManagerGUI {
@@ -45,6 +46,12 @@ public class TaskManagerGUI {
                     readTaskManager(fileName);  // This loads the tasks into the TaskManager
                     String selectedTaskTitle = selectedTask.split(" - ")[0].trim();
                     boolean result = taskManager.markTask(selectedTaskTitle);
+                    taskManager.l.sort(Comparator.comparing(task -> task.Priority));
+                    try {
+                        taskManager.writeTaskManager(fileName);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     try {
                         taskManager.writeTaskManager(fileName);
                     } catch (IOException ex) {

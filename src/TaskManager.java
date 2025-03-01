@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class TaskManager {
@@ -45,6 +46,7 @@ public class TaskManager {
     }
 
     public boolean writeTaskManager(String fileName) throws IOException {
+        this.l.sort(Comparator.comparing(task -> task.Priority));
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName));
         oos.writeObject(this.l);
         oos.flush();
