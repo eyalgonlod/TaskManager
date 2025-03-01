@@ -5,6 +5,8 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.Comparator;
 import java.util.List;
+import java.time.LocalDate;
+
 
 public class TaskManagerGUI {
     private JFrame frame;
@@ -12,8 +14,10 @@ public class TaskManagerGUI {
     private JList<String> taskList;
     private JButton loadButton;
     private JButton markTaskButton;
+    private JButton addTaskButton; // <-- Declare the addTaskButton here
     private String fileName = "tasks.dat";
     private TaskManager taskManager;
+
 
     public TaskManagerGUI() {
         // Initialize the TaskManager
@@ -43,15 +47,10 @@ public class TaskManagerGUI {
                 String selectedTask = taskList.getSelectedValue();
                 if (selectedTask != null) {
                     // Load tasks from file into TaskManager before marking
-                    readTaskManager(fileName);  // This loads the tasks into the TaskManager
+                    readTaskManager(fileName);
                     String selectedTaskTitle = selectedTask.split(" - ")[0].trim();
                     boolean result = taskManager.markTask(selectedTaskTitle);
                     taskManager.l.sort(Comparator.comparing(task -> task.Priority));
-                    try {
-                        taskManager.writeTaskManager(fileName);
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
                     try {
                         taskManager.writeTaskManager(fileName);
                     } catch (IOException ex) {
@@ -69,17 +68,50 @@ public class TaskManagerGUI {
             }
         });
 
+        // Add Task Button
+        addTaskButton = new JButton("Add Task");
+        addTaskButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Show dialog for task details
+                String title = JOptionPane.showInputDialog(frame, "Enter task title:");
+                String description = JOptionPane.showInputDialog(frame, "Enter task description:");
+                String priorityString = JOptionPane.showInputDialog(frame, "Enter task priority (0-3):");
+                String dateString = JOptionPane.showInputDialog(frame, "Enter task date (Example: 2025-03-01):");
 
+                if (title != null && description != null && priorityString != null && dateString != null) {
+                    try {
+                        int priority = Integer.parseInt(priorityString);
+                        LocalDate date = LocalDate.parse(dateString);
 
-        frame.add(scrollPane, BorderLayout.CENTER);
+                        // Add the task to the TaskManager
+                        taskManager.addTask(title, description, priority, date);
+
+                        // Save tasks to file
+                        taskManager.writeTaskManager(fileName);
+
+                        // Refresh the task list
+                        readTaskManager(fileName);
+
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(frame, "Invalid input. Please try again.");
+                    }
+                }
+            }
+        });
+
+        // Add buttons to the panel
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout());
         buttonPanel.add(loadButton);
         buttonPanel.add(markTaskButton);
+        buttonPanel.add(addTaskButton);  // Added here
         frame.add(buttonPanel, BorderLayout.SOUTH);
 
+        frame.add(scrollPane, BorderLayout.CENTER);
         frame.setVisible(true);
     }
+
 
     private void readTaskManager(String fileName) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName))) {
@@ -96,6 +128,8 @@ public class TaskManagerGUI {
             e.printStackTrace();
         }
     }
+
+
 
 
     public static void main(String[] args) {
