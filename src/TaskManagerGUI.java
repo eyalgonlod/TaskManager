@@ -24,7 +24,7 @@ public class TaskManagerGUI {
         taskManager = new TaskManager();
 
         frame = new JFrame("Task Manager");
-        frame.setSize(400, 400);
+        frame.setSize(450, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
@@ -100,17 +100,52 @@ public class TaskManagerGUI {
             }
         });
 
+        // Delete Task Button (new addition)
+        JButton deleteTaskButton = new JButton("Delete Task");
+        deleteTaskButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String selectedTask = taskList.getSelectedValue();
+                if (selectedTask != null) {
+                    // Load tasks from file into TaskManager before deleting
+                    readTaskManager(fileName);
+                    String selectedTaskTitle = selectedTask.split(" - ")[0].trim();
+                    boolean result = taskManager.deleteTask(selectedTaskTitle);  // Use deleteTask here
+                    try {
+                        taskManager.writeTaskManager(fileName);  // Save tasks after deleting
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    if (result) {
+                        JOptionPane.showMessageDialog(frame, "Task deleted successfully!");
+                        readTaskManager(fileName); // Refresh the task list after deletion
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "Task not found!");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Please select a task to delete.");
+                }
+            }
+        });
+
         // Add buttons to the panel
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout());
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT));  // Explicitly set layout
         buttonPanel.add(loadButton);
         buttonPanel.add(markTaskButton);
-        buttonPanel.add(addTaskButton);  // Added here
+        buttonPanel.add(addTaskButton);
+        buttonPanel.add(deleteTaskButton);  // Add Delete Task button here
         frame.add(buttonPanel, BorderLayout.SOUTH);
 
         frame.add(scrollPane, BorderLayout.CENTER);
         frame.setVisible(true);
+
+        // Revalidate and repaint to make sure layout is updated
+        frame.revalidate();
+        frame.repaint();
     }
+
+
 
 
     private void readTaskManager(String fileName) {
