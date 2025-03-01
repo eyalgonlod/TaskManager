@@ -1,6 +1,7 @@
 Task Manager Application
 
 This is a simple Task Manager application that allows users to create, manage, and save tasks with various details such as title, description, priority, and due date.
+
 The application provides a GUI built with Java Swing, enabling users to interact with the task list in a user-friendly way.
 
 Features:
